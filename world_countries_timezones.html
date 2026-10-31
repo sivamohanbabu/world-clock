@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Countries & Timezones Directory</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-hover: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --border: #334155;
+      --badge-bg: #0284c7;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      padding: 2rem 1rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+    }
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 0.25rem;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 260px;
+      padding: 0.65rem 1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background-color: var(--surface);
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-box:focus {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      background: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.65rem 1.2rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--accent);
+    }
+
+    .table-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+    }
+
+    .table-container {
+      overflow-x: auto;
+      max-height: 75vh;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      background-color: #172033;
+      z-index: 2;
+    }
+
+    th {
+      padding: 0.85rem 1rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tr:hover td {
+      background-color: var(--surface-hover);
+    }
+
+    .code-badge {
+      display: inline-block;
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.07);
+      color: var(--accent);
+    }
+
+    .utc-badge {
+      display: inline-block;
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 0.2rem 0.45rem;
+      border-radius: 4px;
+      background: #0369a1;
+      color: #fff;
+      font-weight: 600;
+      margin-right: 0.25rem;
+    }
+
+    .iana-tag {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .clock {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: #38bdf8;
+    }
+
+    .counter {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div>
+        <h1>World Countries & Timezones</h1>
+        <p class="subtitle">Complete ISO list with standard UTC offsets and live current local time</p>
+      </div>
+      <div class="counter" id="recordCount">Loading data...</div>
+    </header>
+
+    <div class="toolbar">
+      <input 
+        type="text" 
+        id="searchInput" 
+        class="search-box" 
+        placeholder="Search country, code, timezone (e.g. Japan, UTC+5, CET)..." 
+        autofocus
+      />
+      <button class="btn" id="exportBtn">Export CSV</button>
+    </div>
+
+    <div class="table-card">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Country / Territory</th>
+              <th>ISO</th>
+              <th>Standard UTC Offset</th>
+              <th>Primary IANA Identifier</th>
+              <th>Current Local Time</th>
+            </tr>
+          </thead>
+          <tbody id="countryTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dataset = [
+      { name: "Afghanistan", code: "AF", utc: "UTC+04:30", iana: "Asia/Kabul" },
+      { name: "Albania", code: "AL", utc: "UTC+01:00", iana: "Europe/Tirane" },
+      { name: "Algeria", code: "DZ", utc: "UTC+01:00", iana: "Africa/Algiers" },
+      { name: "Andorra", code: "AD", utc: "UTC+01:00", iana: "Europe/Andorra" },
+      { name: "Angola", code: "AO", utc: "UTC+01:00", iana: "Africa/Luanda" },
+      { name: "Antigua and Barbuda", code: "AG", utc: "UTC-04:00", iana: "America/Antigua" },
+      { name: "Argentina", code: "AR", utc: "UTC-03:00", iana: "America/Argentina/Buenos_Aires" },
+      { name: "Armenia", code: "AM", utc: "UTC+04:00", iana: "Asia/Yerevan" },
+      { name: "Australia", code: "AU", utc: "UTC+08:00 to +10:30", iana: "Australia/Sydney" },
+      { name: "Austria", code: "AT", utc: "UTC+01:00", iana: "Europe/Vienna" },
+      { name: "Azerbaijan", code: "AZ", utc: "UTC+04:00", iana: "Asia/Baku" },
+      { name: "Bahamas", code: "BS", utc: "UTC-05:00", iana: "America/Nassau" },
+      { name: "Bahrain", code: "BH", utc: "UTC+03:00", iana: "Asia/Bahrain" },
+      { name: "Bangladesh", code: "BD", utc: "UTC+06:00", iana: "Asia/Dhaka" },
+      { name: "Barbados", code: "BB", utc: "UTC-04:00", iana: "America/Barbados" },
+      { name: "Belarus", code: "BY", utc: "UTC+03:00", iana: "Europe/Minsk" },
+      { name: "Belgium", code: "BE", utc: "UTC+01:00", iana: "Europe/Brussels" },
+      { name: "Belize", code: "BZ", utc: "UTC-06:00", iana: "America/Belize" },
+      { name: "Benin", code: "BJ", utc: "UTC+01:00", iana: "Africa/Porto-Novo" },
+      { name: "Bhutan", code: "BT", utc: "UTC+06:00", iana: "Asia/Thimphu" },
+      { name: "Bolivia", code: "BO", utc: "UTC-04:00", iana: "America/La_Paz" },
+      { name: "Bosnia and Herzegovina", code: "BA", utc: "UTC+01:00", iana: "Europe/Sarajevo" },
+      { name: "Botswana", code: "BW", utc: "UTC+02:00", iana: "Africa/Gaborone" },
+      { name: "Brazil", code: "BR", utc: "UTC-05:00 to -02:00", iana: "America/Sao_Paulo" },
+      { name: "Brunei", code: "BN", utc: "UTC+08:00", iana: "Asia/Brunei" },
+      { name: "Bulgaria", code: "BG", utc: "UTC+02:00", iana: "Europe/Sofia" },
+      { name: "Burkina Faso", code: "BF", utc: "UTC+00:00", iana: "Africa/Ouagadougou" },
+      { name: "Burundi", code: "BI", utc: "UTC+02:00", iana: "Africa/Bujumbura" },
+      { name: "Cabo Verde", code: "CV", utc: "UTC-01:00", iana: "Atlantic/Cape_Verde" },
+      { name: "Cambodia", code: "KH", utc: "UTC+07:00", iana: "Asia/Phnom_Penh" },
+      { name: "Cameroon", code: "CM", utc: "UTC+01:00", iana: "Africa/Douala" },
+      { name: "Canada", code: "CA", utc: "UTC-08:00 to -03:30", iana: "America/Toronto" },
+      { name: "Central African Republic", code: "CF", utc: "UTC+01:00", iana: "Africa/Bangui" },
+      { name: "Chad", code: "TD", utc: "UTC+01:00", iana: "Africa/Ndjamena" },
+      { name: "Chile", code: "CL", utc: "UTC-06:00 to -03:00", iana: "America/Santiago" },
+      { name: "China", code: "CN", utc: "UTC+08:00", iana: "Asia/Shanghai" },
+      { name: "Colombia", code: "CO", utc: "UTC-05:00", iana: "America/Bogota" },
+      { name: "Comoros", code: "KM", utc: "UTC+03:00", iana: "Indian/Comoro" },
+      { name: "Congo (Brazzaville)", code: "CG", utc: "UTC+01:00", iana: "Africa/Brazzaville" },
+      { name: "Congo (Kinshasa)", code: "CD", utc: "UTC+01:00 to +02:00", iana: "Africa/Kinshasa" },
+      { name: "Costa Rica", code: "CR", utc: "UTC-06:00", iana: "America/Costa_Rica" },
+      { name: "Croatia", code: "HR", utc: "UTC+01:00", iana: "Europe/Zagreb" },
+      { name: "Cuba", code: "CU", utc: "UTC-05:00", iana: "America/Havana" },
+      { name: "Cyprus", code: "CY", utc: "UTC+02:00", iana: "Asia/Nicosia" },
+      { name: "Czech Republic", code: "CZ", utc: "UTC+01:00", iana: "Europe/Prague" },
+      { name: "Denmark", code: "DK", utc: "UTC+01:00", iana: "Europe/Copenhagen" },
+      { name: "Djibouti", code: "DJ", utc: "UTC+03:00", iana: "Africa/Djibouti" },
+      { name: "Dominica", code: "DM", utc: "UTC-04:00", iana: "America/Dominica" },
+      { name: "Dominican Republic", code: "DO", utc: "UTC-04:00", iana: "America/Santo_Domingo" },
+      { name: "Ecuador", code: "EC", utc: "UTC-06:00 to -05:00", iana: "America/Guayaquil" },
+      { name: "Egypt", code: "EG", utc: "UTC+02:00", iana: "Africa/Cairo" },
+      { name: "El Salvador", code: "SV", utc: "UTC-06:00", iana: "America/El_Salvador" },
+      { name: "Equatorial Guinea", code: "GQ", utc: "UTC+01:00", iana: "Africa/Malabo" },
+      { name: "Eritrea", code: "ER", utc: "UTC+03:00", iana: "Africa/Asmara" },
+      { name: "Estonia", code: "EE", utc: "UTC+02:00", iana: "Europe/Tallinn" },
+      { name: "Eswatini", code: "SZ", utc: "UTC+02:00", iana: "Africa/Mbabane" },
+      { name: "Ethiopia", code: "ET", utc: "UTC+03:00", iana: "Africa/Addis_Ababa" },
+      { name: "Fiji", code: "FJ", utc: "UTC+12:00", iana: "Pacific/Fiji" },
+      { name: "Finland", code: "FI", utc: "UTC+02:00", iana: "Europe/Helsinki" },
+      { name: "France", code: "FR", utc: "UTC+01:00", iana: "Europe/Paris" },
+      { name: "Gabon", code: "GA", utc: "UTC+01:00", iana: "Africa/Libreville" },
+      { name: "Gambia", code: "GM", utc: "UTC+00:00", iana: "Africa/Banjul" },
+      { name: "Georgia", code: "GE", utc: "UTC+04:00", iana: "Asia/Tbilisi" },
+      { name: "Germany", code: "DE", utc: "UTC+01:00", iana: "Europe/Berlin" },
+      { name: "Ghana", code: "GH", utc: "UTC+00:00", iana: "Africa/Accra" },
+      { name: "Greece", code: "GR", utc: "UTC+02:00", iana: "Europe/Athens" },
+      { name: "Grenada", code: "GD", utc: "UTC-04:00", iana: "America/Grenada" },
+      { name: "Guatemala", code: "GT", utc: "UTC-06:00", iana: "America/Guatemala" },
+      { name: "Guinea", code: "GN", utc: "UTC+00:00", iana: "Africa/Conakry" },
+      { name: "Guinea-Bissau", code: "GW", utc: "UTC+00:00", iana: "Africa/Bissau" },
+      { name: "Guyana", code: "GY", utc: "UTC-04:00", iana: "America/Guyana" },
+      { name: "Haiti", code: "HT", utc: "UTC-05:00", iana: "America/Port-au-Prince" },
+      { name: "Honduras", code: "HN", utc: "UTC-06:00", iana: "America/Tegucigalpa" },
+      { name: "Hungary", code: "HU", utc: "UTC+01:00", iana: "Europe/Budapest" },
+      { name: "Iceland", code: "IS", utc: "UTC+00:00", iana: "Atlantic/Reykjavik" },
+      { name: "India", code: "IN", utc: "UTC+05:30", iana: "Asia/Kolkata" },
+      { name: "Indonesia", code: "ID", utc: "UTC+07:00 to +09:00", iana: "Asia/Jakarta" },
+      { name: "Iran", code: "IR", utc: "UTC+03:30", iana: "Asia/Tehran" },
+      { name: "Iraq", code: "IQ", utc: "UTC+03:00", iana: "Asia/Baghdad" },
+      { name: "Ireland", code: "IE", utc: "UTC+00:00", iana: "Europe/Dublin" },
+      { name: "Israel", code: "IL", utc: "UTC+02:00", iana: "Asia/Jerusalem" },
+      { name: "Italy", code: "IT", utc: "UTC+01:00", iana: "Europe/Rome" },
+      { name: "Jamaica", code: "JM", utc: "UTC-05:00", iana: "America/Jamaica" },
+      { name: "Japan", code: "JP", utc: "UTC+09:00", iana: "Asia/Tokyo" },
+      { name: "Jordan", code: "JO", utc: "UTC+03:00", iana: "Asia/Amman" },
+      { name: "Kazakhstan", code: "KZ", utc: "UTC+05:00", iana: "Asia/Almaty" },
+      { name: "Kenya", code: "KE", utc: "UTC+03:00", iana: "Africa/Nairobi" },
+      { name: "Kiribati", code: "KI", utc: "UTC+12:00 to +14:00", iana: "Pacific/Tarawa" },
+      { name: "Kuwait", code: "KW", utc: "UTC+03:00", iana: "Asia/Kuwait" },
+      { name: "Kyrgyzstan", code: "KG", utc: "UTC+06:00", iana: "Asia/Bishkek" },
+      { name: "Laos", code: "LA", utc: "UTC+07:00", iana: "Asia/Vientiane" },
+      { name: "Latvia", code: "LV", utc: "UTC+02:00", iana: "Europe/Riga" },
+      { name: "Lebanon", code: "LB", utc: "UTC+02:00", iana: "Asia/Beirut" },
+      { name: "Lesotho", code: "LS", utc: "UTC+02:00", iana: "Africa/Maseru" },
+      { name: "Liberia", code: "LR", utc: "UTC+00:00", iana: "Africa/Monrovia" },
+      { name: "Libya", code: "LY", utc: "UTC+02:00", iana: "Africa/Tripoli" },
+      { name: "Liechtenstein", code: "LI", utc: "UTC+01:00", iana: "Europe/Vaduz" },
+      { name: "Lithuania", code: "LT", utc: "UTC+02:00", iana: "Europe/Vilnius" },
+      { name: "Luxembourg", code: "LU", utc: "UTC+01:00", iana: "Europe/Luxembourg" },
+      { name: "Madagascar", code: "MG", utc: "UTC+03:00", iana: "Indian/Antananarivo" },
+      { name: "Malawi", code: "MW", utc: "UTC+02:00", iana: "Africa/Blantyre" },
+      { name: "Malaysia", code: "MY", utc: "UTC+08:00", iana: "Asia/Kuala_Lumpur" },
+      { name: "Maldives", code: "MV", utc: "UTC+05:00", iana: "Indian/Maldives" },
+      { name: "Mali", code: "ML", utc: "UTC+00:00", iana: "Africa/Bamako" },
+      { name: "Malta", code: "MT", utc: "UTC+01:00", iana: "Europe/Malta" },
+      { name: "Marshall Islands", code: "MH", utc: "UTC+12:00", iana: "Pacific/Majuro" },
+      { name: "Mauritania", code: "MR", utc: "UTC+00:00", iana: "Africa/Nouakchott" },
+      { name: "Mauritius", code: "MU", utc: "UTC+04:00", iana: "Indian/Mauritius" },
+      { name: "Mexico", code: "MX", utc: "UTC-08:00 to -05:00", iana: "America/Mexico_City" },
+      { name: "Micronesia", code: "FM", utc: "UTC+10:00 to +11:00", iana: "Pacific/Pohnpei" },
+      { name: "Moldova", code: "MD", utc: "UTC+02:00", iana: "Europe/Chisinau" },
+      { name: "Monaco", code: "MC", utc: "UTC+01:00", iana: "Europe/Monaco" },
+      { name: "Mongolia", code: "MN", utc: "UTC+07:00 to +08:00", iana: "Asia/Ulaanbaatar" },
+      { name: "Montenegro", code: "ME", utc: "UTC+01:00", iana: "Europe/Podgorica" },
+      { name: "Morocco", code: "MA", utc: "UTC+01:00", iana: "Africa/Casablanca" },
+      { name: "Mozambique", code: "MZ", utc: "UTC+02:00", iana: "Africa/Maputo" },
+      { name: "Myanmar", code: "MM", utc: "UTC+06:30", iana: "Asia/Yangon" },
+      { name: "Namibia", code: "NA", utc: "UTC+02:00", iana: "Africa/Windhoek" },
+      { name: "Nauru", code: "NR", utc: "UTC+12:00", iana: "Pacific/Nauru" },
+      { name: "Nepal", code: "NP", utc: "UTC+05:45", iana: "Asia/Kathmandu" },
+      { name: "Netherlands", code: "NL", utc: "UTC+01:00", iana: "Europe/Amsterdam" },
+      { name: "New Zealand", code: "NZ", utc: "UTC+12:00 to +13:00", iana: "Pacific/Auckland" },
+      { name: "Nicaragua", code: "NI", utc: "UTC-06:00", iana: "America/Managua" },
+      { name: "Niger", code: "NE", utc: "UTC+01:00", iana: "Africa/Niamey" },
+      { name: "Nigeria", code: "NG", utc: "UTC+01:00", iana: "Africa/Lagos" },
+      { name: "North Korea", code: "KP", utc: "UTC+09:00", iana: "Asia/Pyongyang" },
+      { name: "North Macedonia", code: "MK", utc: "UTC+01:00", iana: "Europe/Skopje" },
+      { name: "Norway", code: "NO", utc: "UTC+01:00", iana: "Europe/Oslo" },
+      { name: "Oman", code: "OM", utc: "UTC+04:00", iana: "Asia/Muscat" },
+      { name: "Pakistan", code: "PK", utc: "UTC+05:00", iana: "Asia/Karachi" },
+      { name: "Palau", code: "PW", utc: "UTC+09:00", iana: "Pacific/Palau" },
+      { name: "Palestine", code: "PS", utc: "UTC+02:00", iana: "Asia/Gaza" },
+      { name: "Panama", code: "PA", utc: "UTC-05:00", iana: "America/Panama" },
+      { name: "Papua New Guinea", code: "PG", utc: "UTC+10:00 to +11:00", iana: "Pacific/Port_Moresby" },
+      { name: "Paraguay", code: "PY", utc: "UTC-04:00", iana: "America/Asuncion" },
+      { name: "Peru", code: "PE", utc: "UTC-05:00", iana: "America/Lima" },
+      { name: "Philippines", code: "PH", utc: "UTC+08:00", iana: "Asia/Manila" },
+      { name: "Poland", code: "PL", utc: "UTC+01:00", iana: "Europe/Warsaw" },
+      { name: "Portugal", code: "PT", utc: "UTC-01:00 to +00:00", iana: "Europe/Lisbon" },
+      { name: "Qatar", code: "QA", utc: "UTC+03:00", iana: "Asia/Qatar" },
+      { name: "Romania", code: "RO", utc: "UTC+02:00", iana: "Europe/Bucharest" },
+      { name: "Russia", code: "RU", utc: "UTC+02:00 to +12:00", iana: "Europe/Moscow" },
+      { name: "Rwanda", code: "RW", utc: "UTC+02:00", iana: "Africa/Kigali" },
+      { name: "Saint Kitts and Nevis", code: "KN", utc: "UTC-04:00", iana: "America/St_Kitts" },
+      { name: "Saint Lucia", code: "LC", utc: "UTC-04:00", iana: "America/St_Lucia" },
+      { name: "Saint Vincent and the Grenadines", code: "VC", utc: "UTC-04:00", iana: "America/St_Vincent" },
+      { name: "Samoa", code: "WS", utc: "UTC+13:00", iana: "Pacific/Apia" },
+      { name: "San Marino", code: "SM", utc: "UTC+01:00", iana: "Europe/San_Marino" },
+      { name: "Sao Tome and Principe", code: "ST", utc: "UTC+00:00", iana: "Africa/Sao_Tome" },
+      { name: "Saudi Arabia", code: "SA", utc: "UTC+03:00", iana: "Asia/Riyadh" },
+      { name: "Senegal", code: "SN", utc: "UTC+00:00", iana: "Africa/Dakar" },
+      { name: "Serbia", code: "RS", utc: "UTC+01:00", iana: "Europe/Belgrade" },
+      { name: "Seychelles", code: "SC", utc: "UTC+04:00", iana: "Indian/Mahe" },
+      { name: "Sierra Leone", code: "SL", utc: "UTC+00:00", iana: "Africa/Freetown" },
+      { name: "Singapore", code: "SG", utc: "UTC+08:00", iana: "Asia/Singapore" },
+      { name: "Slovakia", code: "SK", utc: "UTC+01:00", iana: "Europe/Bratislava" },
+      { name: "Slovenia", code: "SI", utc: "UTC+01:00", iana: "Europe/Ljubljana" },
+      { name: "Solomon Islands", code: "SB", utc: "UTC+11:00", iana: "Pacific/Guadalcanal" },
+      { name: "Somalia", code: "SO", utc: "UTC+03:00", iana: "Africa/Mogadishu" },
+      { name: "South Africa", code: "ZA", utc: "UTC+02:00", iana: "Africa/Johannesburg" },
+      { name: "South Korea", code: "KR", utc: "UTC+09:00", iana: "Asia/Seoul" },
+      { name: "South Sudan", code: "SS", utc: "UTC+02:00", iana: "Africa/Juba" },
+      { name: "Spain", code: "ES", utc: "UTC+00:00 to +01:00", iana: "Europe/Madrid" },
+      { name: "Sri Lanka", code: "LK", utc: "UTC+05:30", iana: "Asia/Colombo" },
+      { name: "Sudan", code: "SD", utc: "UTC+02:00", iana: "Africa/Khartoum" },
+      { name: "Suriname", code: "SR", utc: "UTC-03:00", iana: "America/Paramaribo" },
+      { name: "Sweden", code: "SE", utc: "UTC+01:00", iana: "Europe/Stockholm" },
+      { name: "Switzerland", code: "CH", utc: "UTC+01:00", iana: "Europe/Zurich" },
+      { name: "Syria", code: "SY", utc: "UTC+03:00", iana: "Asia/Damascus" },
+      { name: "Taiwan", code: "TW", utc: "UTC+08:00", iana: "Asia/Taipei" },
+      { name: "Tajikistan", code: "TJ", utc: "UTC+05:00", iana: "Asia/Dushanbe" },
+      { name: "Tanzania", code: "TZ", utc: "UTC+03:00", iana: "Africa/Dar_es_Salaam" },
+      { name: "Thailand", code: "TH", utc: "UTC+07:00", iana: "Asia/Bangkok" },
+      { name: "Timor-Leste", code: "TL", utc: "UTC+09:00", iana: "Asia/Dili" },
+      { name: "Togo", code: "TG", utc: "UTC+00:00", iana: "Africa/Lome" },
+      { name: "Tonga", code: "TO", utc: "UTC+13:00", iana: "Pacific/Tongatapu" },
+      { name: "Trinidad and Tobago", code: "TT", utc: "UTC-04:00", iana: "America/Port_of_Spain" },
+      { name: "Tunisia", code: "TN", utc: "UTC+01:00", iana: "Africa/Tunis" },
+      { name: "Turkey", code: "TR", utc: "UTC+03:00", iana: "Europe/Istanbul" },
+      { name: "Turkmenistan", code: "TM", utc: "UTC+05:00", iana: "Asia/Ashgabat" },
+      { name: "Tuvalu", code: "TV", utc: "UTC+12:00", iana: "Pacific/Funafuti" },
+      { name: "Uganda", code: "UG", utc: "UTC+03:00", iana: "Africa/Kampala" },
+      { name: "Ukraine", code: "UA", utc: "UTC+02:00", iana: "Europe/Kyiv" },
+      { name: "United Arab Emirates", code: "AE", utc: "UTC+04:00", iana: "Asia/Dubai" },
+      { name: "United Kingdom", code: "GB", utc: "UTC+00:00", iana: "Europe/London" },
+      { name: "United States", code: "US", utc: "UTC-10:00 to -05:00", iana: "America/New_York" },
+      { name: "Uruguay", code: "UY", utc: "UTC-03:00", iana: "America/Montevideo" },
+      { name: "Uzbekistan", code: "UZ", utc: "UTC+05:00", iana: "Asia/Tashkent" },
+      { name: "Vanuatu", code: "VU", utc: "UTC+11:00", iana: "Pacific/Efate" },
+      { name: "Vatican City", code: "VA", utc: "UTC+01:00", iana: "Europe/Vatican" },
+      { name: "Venezuela", code: "VE", utc: "UTC-04:00", iana: "America/Caracas" },
+      { name: "Vietnam", code: "VN", utc: "UTC+07:00", iana: "Asia/Ho_Chi_Minh" },
+      { name: "Yemen", code: "YE", utc: "UTC+03:00", iana: "Asia/Aden" },
+      { name: "Zambia", code: "ZM", utc: "UTC+02:00", iana: "Africa/Lusaka" },
+      { name: "Zimbabwe", code: "ZW", utc: "UTC+02:00", iana: "Africa/Harare" }
+    ];
+
+    const tableBody = document.getElementById("countryTableBody");
+    const searchInput = document.getElementById("searchInput");
+    const recordCount = document.getElementById("recordCount");
+
+    function renderTable(filterText = "") {
+      const q = filterText.trim().toLowerCase();
+      const filtered = dataset.filter(item => 
+        item.name.toLowerCase().includes(q) ||
+        item.code.toLowerCase().includes(q) ||
+        item.utc.toLowerCase().includes(q) ||
+        item.iana.toLowerCase().includes(q)
+      );
+
+      tableBody.innerHTML = filtered.map(row => `
+        <tr>
+          <td><strong>${row.name}</strong></td>
+          <td><span class="code-badge">${row.code}</span></td>
+          <td><span class="utc-badge">${row.utc}</span></td>
+          <td class="iana-tag">${row.iana}</td>
+          <td><span class="clock" data-zone="${row.iana}">--:--:--</span></td>
+        </tr>
+      `).join("");
+
+      recordCount.textContent = `Showing ${filtered.length} of ${dataset.length} countries`;
+      updateClocks();
+    }
+
+    function updateClocks() {
+      const now = new Date();
+      document.querySelectorAll(".clock").forEach(el => {
+        const timeZone = el.getAttribute("data-zone");
+        try {
+          el.textContent = new Intl.DateTimeFormat("en-US", {
+            timeZone: timeZone,
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: true
+          }).format(now);
+        } catch (e) {
+          el.textContent = "N/A";
+        }
+      });
+    }
+
+    searchInput.addEventListener("input", (e) => renderTable(e.target.value));
+
+    document.getElementById("exportBtn").addEventListener("click", () => {
+      const csvContent = "data:text/csv;charset=utf-8," + 
+        ["Country,ISO Code,UTC Offset,Primary IANA Timezone"]
+        .concat(dataset.map(d => `"${d.name}","${d.code}","${d.utc}","${d.iana}"`))
+        .join("\n");
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "countries_timezones.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+
+    renderTable();
+    setInterval(updateClocks, 1000);
+  </script>
+</body>
+</html>
